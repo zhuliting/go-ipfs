@@ -10,7 +10,7 @@ import (
 	e "github.com/ipfs/go-ipfs/core/commands/e"
 	nc "github.com/ipfs/go-ipfs/namecache"
 
-	"gx/ipfs/QmUyfy4QSr3NXym4etEiRyxBLqqAeKHJuRdi8AACxg63fZ/go-ipfs-cmdkit"
+	cmdkit "gx/ipfs/QmceUdzxkimdYsgtX733uNgzf1DLHyBKN6ehGSp85ayppM/go-ipfs-cmdkit"
 )
 
 type ipnsFollowResult struct {
@@ -43,7 +43,7 @@ Follows an IPNS name by periodically resolving in the backround.
 	},
 	Options: []cmdkit.Option{
 		cmdkit.BoolOption("pin", "Recursively pin the resolved pointer"),
-		cmdkit.StringOption("refresh-interval", "Follow refresh interval."),
+		cmdkit.StringOption("refresh-interval", "Follow refresh interval; defaults to 1hr."),
 	},
 
 	Run: func(req cmds.Request, res cmds.Response) {
@@ -66,10 +66,8 @@ Follows an IPNS name by periodically resolving in the backround.
 			return
 		}
 
-		var refr time.Duration
-		if refrS == "" {
-			refr = nc.DefaultFollowInterval
-		} else {
+		refr := nc.DefaultFollowInterval
+		if refrS != "" {
 			refr, err = time.ParseDuration(refrS)
 			if err != nil {
 				res.SetError(err, cmdkit.ErrNormal)
