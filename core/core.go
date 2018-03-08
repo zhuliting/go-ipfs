@@ -16,7 +16,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net"
 	"os"
 	"strings"
 	"time"
@@ -39,8 +38,8 @@ import (
 	config "github.com/ipfs/go-ipfs/repo/config"
 	ft "github.com/ipfs/go-ipfs/unixfs"
 
-	addrutil "gx/ipfs/QmNSWW3Sb4eju4o2djPQ1L1c2Zj9XN9sMYJL8r1cbxdc6b/go-addr-util"
 	yamux "gx/ipfs/QmNWCEvi7bPRcvqAV8AKLGVNoQdArWi7NJayka2SM4XtRe/go-smux-yamux"
+	libp2p "gx/ipfs/QmNh1kGFFdsPu79KNSaL4NUKUPb4Eiz4KHdMtFY6664RDp/go-libp2p"
 	discovery "gx/ipfs/QmNh1kGFFdsPu79KNSaL4NUKUPb4Eiz4KHdMtFY6664RDp/go-libp2p/p2p/discovery"
 	p2pbhost "gx/ipfs/QmNh1kGFFdsPu79KNSaL4NUKUPb4Eiz4KHdMtFY6664RDp/go-libp2p/p2p/host/basic"
 	rhost "gx/ipfs/QmNh1kGFFdsPu79KNSaL4NUKUPb4Eiz4KHdMtFY6664RDp/go-libp2p/p2p/host/routed"
@@ -52,10 +51,8 @@ import (
 	goprocess "gx/ipfs/QmSF8fPo3jgVBAy8fpdjjYqgG87dkJgUprRBHRd2tmfgpP/goprocess"
 	floodsub "gx/ipfs/QmSFihvoND3eDaAYRCeLgLPt62yCPgMZs1NSZmKFEtJQQw/go-libp2p-floodsub"
 	mamask "gx/ipfs/QmSMZwvs3n4GBikZ7hKzT17c3bk65FmyZo2JqtJ16swqCv/multiaddr-filter"
-	swarm "gx/ipfs/QmSwZMWwFZSUpe5muU2xgTUwppH24KfMwdPXiwbEp2c6G5/go-libp2p-swarm"
 	routing "gx/ipfs/QmTiWLZ6Fo5j4KcTVutZJ5KWRRJrbxzmxA4td8NfEdrPh7/go-libp2p-routing"
 	circuit "gx/ipfs/QmVTnHzuyECV9JzbXXfZRj1pKtgknp1esamUb2EH33mJkA/go-libp2p-circuit"
-	mssmux "gx/ipfs/QmVniQJkdzLZaZwzwMdd3dJTvWiJ1DQEkreVy6hs6h7Vk5/go-smux-multistream"
 	ma "gx/ipfs/QmWWQ2Txc2c6tqjsBpzg5Ar652cHPGNsQQp2SejkNmkUMb/go-multiaddr"
 	ds "gx/ipfs/QmXRKBQA4wXP7xWbFiZsR1GP4HV6wMDQ1aWFxZZ4uBcPX9/go-datastore"
 	pstore "gx/ipfs/QmXauCuJzmzapetmC6W4TuDJLL1yFFrVzSHoWv8YdbmnxH/go-libp2p-peerstore"
@@ -64,7 +61,6 @@ import (
 	dht "gx/ipfs/QmY1y2M1aCcVhy8UuTbZJBvuFbegZm47f9cDAdgxiehQfx/go-libp2p-kad-dht"
 	smux "gx/ipfs/QmY9JXR3FupnYAYJWK9aMr9bCpqWKcToQ1tz8DVGTrHpHw/go-stream-muxer"
 	connmgr "gx/ipfs/QmZ1R2LxRZTUaeuMFEtQigzHfFCv3hLYBi5316aZ7YUeyf/go-libp2p-connmgr"
-	ipnet "gx/ipfs/QmZPrWxuM8GHr4cGKbyF5CCT11sFUP9hgqpeUHALvx2nUr/go-libp2p-interface-pnet"
 	peer "gx/ipfs/QmZoWKhxUmZ2seW4BzX6fJkNR8hh9PsGModr7q171yq2SS/go-libp2p-peer"
 	bstore "gx/ipfs/QmaG4DZ4JaqEfvPWt5nPPgoTzhc1tr1T3f4Nu9Jpdm8ymY/go-ipfs-blockstore"
 	ic "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
@@ -168,30 +164,29 @@ func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption Routin
 	if err != nil {
 		return err
 	}
-	var addrfilter []*net.IPNet
+
+	var libp2pOpts []libp2p.Option
 	for _, s := range cfg.Swarm.AddrFilters {
 		f, err := mamask.NewMask(s)
 		if err != nil {
 			return fmt.Errorf("incorrectly formatted address filter in config: %s", s)
 		}
-		addrfilter = append(addrfilter, f)
+		libp2pOpts = append(libp2pOpts, libp2p.FilterAddresses(f))
 	}
 
 	if !cfg.Swarm.DisableBandwidthMetrics {
 		// Set reporter
 		n.Reporter = metrics.NewBandwidthCounter()
+		libp2pOpts = append(libp2pOpts, libp2p.BandwidthReporter(n.Reporter))
 	}
-
-	tpt := makeSmuxTransport(mplex)
 
 	swarmkey, err := n.Repo.SwarmKey()
 	if err != nil {
 		return err
 	}
 
-	var protec ipnet.Protector
 	if swarmkey != nil {
-		protec, err = pnet.NewProtector(bytes.NewReader(swarmkey))
+		protec, err := pnet.NewProtector(bytes.NewReader(swarmkey))
 		if err != nil {
 			return err
 		}
@@ -214,27 +209,39 @@ func (n *IpfsNode) startOnlineServices(ctx context.Context, routingOption Routin
 				}
 			}
 		}()
+
+		libp2pOpts = append(libp2pOpts, libp2p.PrivateNetwork(protec))
 	}
 
 	addrsFactory, err := makeAddrsFactory(cfg.Addresses)
 	if err != nil {
 		return err
 	}
+	if !cfg.Swarm.DisableRelay {
+		addrsFactory = composeAddrsFactory(addrsFactory, filterRelayAddrs)
+	}
+	libp2pOpts = append(libp2pOpts, libp2p.AddrsFactory(addrsFactory))
 
-	connmgr, err := constructConnMgr(cfg.Swarm.ConnMgr)
+	connm, err := constructConnMgr(cfg.Swarm.ConnMgr)
 	if err != nil {
 		return err
 	}
+	libp2pOpts = append(libp2pOpts, libp2p.ConnectionManager(connm))
 
-	hostopts := &ConstructPeerHostOpts{
-		AddrsFactory:      addrsFactory,
-		DisableNatPortMap: cfg.Swarm.DisableNatPortMap,
-		DisableRelay:      cfg.Swarm.DisableRelay,
-		EnableRelayHop:    cfg.Swarm.EnableRelayHop,
-		ConnectionManager: connmgr,
+	libp2pOpts = append(libp2pOpts, makeSmuxTransportOption(mplex))
+
+	if !cfg.Swarm.DisableNatPortMap {
+		libp2pOpts = append(libp2pOpts, libp2p.NATPortMap())
 	}
-	peerhost, err := hostOption(ctx, n.Identity, n.Peerstore, n.Reporter,
-		addrfilter, tpt, protec, hostopts)
+	if !cfg.Swarm.DisableRelay {
+		var opts []circuit.RelayOpt
+		if cfg.Swarm.EnableRelayHop {
+			opts = append(opts, circuit.OptHop)
+		}
+		libp2pOpts = append(libp2pOpts, libp2p.EnableRelay(opts...))
+	}
+
+	peerhost, err := hostOption(ctx, n.Identity, n.Peerstore, libp2pOpts...)
 
 	if err != nil {
 		return err
@@ -382,8 +389,9 @@ func makeAddrsFactory(cfg config.Addresses) (p2pbhost.AddrsFactory, error) {
 	}, nil
 }
 
-func makeSmuxTransport(mplexExp bool) smux.Transport {
-	mstpt := mssmux.NewBlankTransport()
+func makeSmuxTransportOption(mplexExp bool) libp2p.Option {
+	const yamuxID = "/yamux/1.0.0"
+	const mplexID = "/mplex/6.7.0"
 
 	ymxtpt := &yamux.Transport{
 		AcceptBacklog:          512,
@@ -398,18 +406,29 @@ func makeSmuxTransport(mplexExp bool) smux.Transport {
 		ymxtpt.LogOutput = os.Stderr
 	}
 
-	mstpt.AddTransport("/yamux/1.0.0", ymxtpt)
-
+	muxers := map[string]smux.Transport{yamuxID: ymxtpt}
 	if mplexExp {
-		mstpt.AddTransport("/mplex/6.7.0", mplex.DefaultTransport)
+		muxers[mplexID] = mplex.DefaultTransport
 	}
 
 	// Allow muxer preference order overriding
+	order := []string{yamuxID, mplexID}
 	if prefs := os.Getenv("LIBP2P_MUX_PREFS"); prefs != "" {
-		mstpt.OrderPreference = strings.Fields(prefs)
+		order = strings.Fields(prefs)
 	}
 
-	return mstpt
+	opts := make([]libp2p.Option, 0, len(order))
+	for _, id := range order {
+		tpt, ok := muxers[id]
+		if !ok {
+			log.Warning("unknown or duplicate muxer in LIBP2P_MUX_PREFS: %s", id)
+			continue
+		}
+		delete(muxers, id)
+		opts = append(opts, libp2p.Muxer(id, tpt))
+	}
+
+	return libp2p.ChainOptions(opts...)
 }
 
 func setupDiscoveryOption(d config.Discovery) DiscoveryOption {
@@ -842,62 +861,18 @@ type ConstructPeerHostOpts struct {
 	ConnectionManager ifconnmgr.ConnManager
 }
 
-type HostOption func(ctx context.Context, id peer.ID, ps pstore.Peerstore, bwr metrics.Reporter, fs []*net.IPNet, tpt smux.Transport, protc ipnet.Protector, opts *ConstructPeerHostOpts) (p2phost.Host, error)
+type HostOption func(ctx context.Context, id peer.ID, ps pstore.Peerstore, options ...libp2p.Option) (p2phost.Host, error)
 
 var DefaultHostOption HostOption = constructPeerHost
 
 // isolates the complex initialization steps
-func constructPeerHost(ctx context.Context, id peer.ID, ps pstore.Peerstore, bwr metrics.Reporter, fs []*net.IPNet, tpt smux.Transport, protec ipnet.Protector, opts *ConstructPeerHostOpts) (p2phost.Host, error) {
-
-	// no addresses to begin with. we'll start later.
-	swrm, err := swarm.NewSwarmWithProtector(ctx, nil, id, ps, protec, tpt, bwr)
-	if err != nil {
-		return nil, err
+func constructPeerHost(ctx context.Context, id peer.ID, ps pstore.Peerstore, options ...libp2p.Option) (p2phost.Host, error) {
+	pkey := ps.PrivKey(id)
+	if pkey == nil {
+		return nil, fmt.Errorf("missing private key for node ID: %s", id.Pretty())
 	}
-
-	network := (*swarm.Network)(swrm)
-
-	for _, f := range fs {
-		network.Swarm().Filters.AddDialFilter(f)
-	}
-
-	hostOpts := []interface{}{bwr}
-	if !opts.DisableNatPortMap {
-		hostOpts = append(hostOpts, p2pbhost.NATPortMap)
-	}
-	if opts.ConnectionManager != nil {
-		hostOpts = append(hostOpts, opts.ConnectionManager)
-	}
-
-	addrsFactory := opts.AddrsFactory
-	if !opts.DisableRelay {
-		if addrsFactory != nil {
-			addrsFactory = composeAddrsFactory(addrsFactory, filterRelayAddrs)
-		} else {
-			addrsFactory = filterRelayAddrs
-		}
-	}
-
-	if addrsFactory != nil {
-		hostOpts = append(hostOpts, addrsFactory)
-	}
-
-	host := p2pbhost.New(network, hostOpts...)
-
-	if !opts.DisableRelay {
-		var relayOpts []circuit.RelayOpt
-		if opts.EnableRelayHop {
-			relayOpts = append(relayOpts, circuit.OptHop)
-		}
-
-		err := circuit.AddRelayTransport(ctx, host, relayOpts...)
-		if err != nil {
-			host.Close()
-			return nil, err
-		}
-	}
-
-	return host, nil
+	options = append([]libp2p.Option{libp2p.Identity(pkey), libp2p.Peerstore(ps)}, options...)
+	return libp2p.New(ctx, options...)
 }
 
 func filterRelayAddrs(addrs []ma.Multiaddr) []ma.Multiaddr {
@@ -925,16 +900,8 @@ func startListening(ctx context.Context, host p2phost.Host, cfg *config.Config) 
 		return err
 	}
 
-	// make sure we error out if our config does not have addresses we can use
-	log.Debugf("Config.Addresses.Swarm:%s", listenAddrs)
-	filteredAddrs := addrutil.FilterUsableAddrs(listenAddrs)
-	log.Debugf("Config.Addresses.Swarm:%s (filtered)", filteredAddrs)
-	if len(filteredAddrs) < 1 {
-		return fmt.Errorf("addresses in config not usable: %s", listenAddrs)
-	}
-
 	// Actually start listening:
-	if err := host.Network().Listen(filteredAddrs...); err != nil {
+	if err := host.Network().Listen(listenAddrs...); err != nil {
 		return err
 	}
 

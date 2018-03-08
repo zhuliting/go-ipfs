@@ -45,7 +45,7 @@ func testValidatorCase(t *testing.T, priv ci.PrivKey, kbook pstore.KeyBook, ns s
 		Value:     data,
 	}
 
-	err = validChecker.Func(rec)
+	err = validChecker(rec)
 	if err != exp {
 		params := fmt.Sprintf("namespace: %s\nkey: %s\neol: %s\n", ns, key, eol)
 		if exp == nil {
@@ -86,11 +86,8 @@ func TestResolverValidation(t *testing.T) {
 
 	vstore := newMockValueStore(rid, dstore, peerstore)
 	vstore.Validator["ipns"] = NewIpnsRecordValidator(peerstore)
-	vstore.Validator["pk"] = &record.ValidChecker{
-		Func: func(r *record.ValidationRecord) error {
-			return nil
-		},
-		Sign: false,
+	vstore.Validator["pk"] = func(r *record.ValidationRecord) error {
+		return nil
 	}
 	resolver := NewRoutingResolver(vstore, 0)
 

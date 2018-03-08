@@ -46,11 +46,11 @@ var ErrPublicKeyNotFound = errors.New("public key not found in peer store")
 // to verify the record's signature. Note that the public key must
 // already have been fetched from the network and put into the KeyBook
 // by the caller.
-func NewIpnsRecordValidator(kbook pstore.KeyBook) *record.ValidChecker {
+func NewIpnsRecordValidator(kbook pstore.KeyBook) record.ValidatorFunc {
 	// ValidateIpnsRecord implements ValidatorFunc and verifies that the
 	// given record's value is an IpnsEntry, that the entry has been correctly
 	// signed, and that the entry has not expired
-	ValidateIpnsRecord := func(r *record.ValidationRecord) error {
+	return func(r *record.ValidationRecord) error {
 		if r.Namespace != "ipns" {
 			return ErrInvalidPath
 		}
@@ -95,10 +95,5 @@ func NewIpnsRecordValidator(kbook pstore.KeyBook) *record.ValidChecker {
 			return ErrUnrecognizedValidity
 		}
 		return nil
-	}
-
-	return &record.ValidChecker{
-		Func: ValidateIpnsRecord,
-		Sign: false,
 	}
 }
