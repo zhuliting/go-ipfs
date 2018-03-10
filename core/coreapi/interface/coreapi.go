@@ -31,6 +31,9 @@ type CoreAPI interface {
 	// ObjectAPI returns an implementation of Object API
 	Object() ObjectAPI
 
+	// Swarm returns an implementation of Swarm API
+	Swarm() SwarmAPI
+
 	// ResolvePath resolves the path using Unixfs resolver
 	ResolvePath(context.Context, Path) (Path, error)
 
