@@ -84,6 +84,7 @@ test_expect_success "ipfs init output looks good" '
   echo "initializing IPFS node at $IPFS_PATH" >expected &&
   echo "generating $BITS-bit RSA keypair...done" >>expected &&
   echo "peer identity: $PEERID" >>expected &&
+  echo "Calculating datastore size. This might take 5m0s at most and will happen only once" >>expected && # TODO: REMOVE THIS!
   echo "to get started, enter:" >>expected &&
   printf "\\n\\t$STARTFILE\\n\\n" >>expected &&
   test_cmp expected actual_init
@@ -111,6 +112,7 @@ test_expect_success "'ipfs init --empty-repo' output looks good" '
   echo "initializing IPFS node at $IPFS_PATH" >expected &&
   echo "generating $BITS-bit RSA keypair...done" >>expected &&
   echo "peer identity: $PEERID" >>expected &&
+  echo "Calculating datastore size. This might take 5m0s at most and will happen only once" >>expected && # TODO: REMOVE THIS!
   test_cmp expected actual_init
 '
 
