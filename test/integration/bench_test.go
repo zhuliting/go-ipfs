@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/ipfs/go-ipfs/thirdparty/unit"
-	testutil "gx/ipfs/QmVvkK7s5imCiq3JVbL3pGfnhcCnf3LrFJPF4GE2sAoGZf/go-testutil"
+	testutil "gx/ipfs/QmW1vsTgpWmkmyopPPVfXcMjbR9qEkzDyeZgF9TXgZx8PU/go-testutil"
 )
 
 func benchmarkAddCat(numBytes int64, conf testutil.LatencyConfig, b *testing.B) {

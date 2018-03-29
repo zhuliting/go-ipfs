@@ -8,17 +8,17 @@ import (
 
 	path "github.com/ipfs/go-ipfs/path"
 
-	p2phost "gx/ipfs/QmNmJZL7FQySMtE2BQuLMuZg2EB2CLEunJJUSVSc9YnnbV/go-libp2p-host"
-	bhost "gx/ipfs/QmQr1j6UvdhpponAaqSdswqRpdzsFwNop2N8kXLNw8afem/go-libp2p-blankhost"
-	floodsub "gx/ipfs/QmSFihvoND3eDaAYRCeLgLPt62yCPgMZs1NSZmKFEtJQQw/go-libp2p-floodsub"
-	swarmt "gx/ipfs/QmSwZMWwFZSUpe5muU2xgTUwppH24KfMwdPXiwbEp2c6G5/go-libp2p-swarm/testing"
-	routing "gx/ipfs/QmTiWLZ6Fo5j4KcTVutZJ5KWRRJrbxzmxA4td8NfEdrPh7/go-libp2p-routing"
-	testutil "gx/ipfs/QmVvkK7s5imCiq3JVbL3pGfnhcCnf3LrFJPF4GE2sAoGZf/go-testutil"
-	ds "gx/ipfs/QmXRKBQA4wXP7xWbFiZsR1GP4HV6wMDQ1aWFxZZ4uBcPX9/go-datastore"
-	pstore "gx/ipfs/QmXauCuJzmzapetmC6W4TuDJLL1yFFrVzSHoWv8YdbmnxH/go-libp2p-peerstore"
-	mockrouting "gx/ipfs/QmXtoXbu9ReyV6Q4kDQ5CF9wXQNDY1PdHc4HhfxRR5AHB3/go-ipfs-routing/mock"
+	bhost "gx/ipfs/QmQPwj694RC9t6RZ2JE8JXMiLWVJZFzPiD3ETZmh8Q5Uz5/go-libp2p-blankhost"
+	pstore "gx/ipfs/QmT1hUXbRnjpWxGWAuRXUiVeyU5yrA7HNFieUBqUDcfgYm/go-libp2p-peerstore"
+	swarmt "gx/ipfs/QmTgDRbvkn6gC57gvsRyHVfZu26LFqW5n6BiGwASiGgG2R/go-libp2p-swarm/testing"
+	routing "gx/ipfs/QmUJLD689v9n9hi1jtXkMgTYji5qpEGBsiMCYDFWbWWCFa/go-libp2p-routing"
+	testutil "gx/ipfs/QmW1vsTgpWmkmyopPPVfXcMjbR9qEkzDyeZgF9TXgZx8PU/go-testutil"
+	floodsub "gx/ipfs/QmWmpEHoxaRCE7jqo5XTdzCqQFqsWNvPreijWPhAhnbrVU/go-libp2p-floodsub"
+	mockrouting "gx/ipfs/QmYWUgR4in6E2ooANpHQDYejuoWvVCLe8sCtuTaCPhgvhP/go-ipfs-routing/mock"
+	p2phost "gx/ipfs/QmZLmWTC8eS1LojwosxjZpyDJtuTZx9bUVb2ZWmCm7hkT5/go-libp2p-host"
 	peer "gx/ipfs/QmZoWKhxUmZ2seW4BzX6fJkNR8hh9PsGModr7q171yq2SS/go-libp2p-peer"
 	ci "gx/ipfs/QmaPbCnUMBohSGo3KnxEa2bHqyJVVeEEcwtqJAYxerieBo/go-libp2p-crypto"
+	ds "gx/ipfs/QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i/go-datastore"
 )
 
 func newNetHost(ctx context.Context, t *testing.T) p2phost.Host {

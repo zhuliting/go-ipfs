@@ -26,7 +26,7 @@ import (
 	util "gx/ipfs/QmNiJuT8Ja3hMVpBHXv3Q6dwmperaQ6JjLtpMQgMCD7xvx/go-ipfs-util"
 	logging "gx/ipfs/QmRb5jh8z2E8hMGN2tkvs1yHynUanqnZ3UeKwgN1i9P1F8/go-log"
 	ma "gx/ipfs/QmWWQ2Txc2c6tqjsBpzg5Ar652cHPGNsQQp2SejkNmkUMb/go-multiaddr"
-	measure "gx/ipfs/QmbJgZGRtkFeSdCxBCPaMKWRDYbqMxHyFfvjQGcWzpqsDe/go-ds-measure"
+	measure "gx/ipfs/QmXez8SABR95KKKgU9XFtTTQ79QRn2nWS9o5pa1EcHsLs5/go-ds-measure"
 )
 
 var log = logging.Logger("fsrepo")
