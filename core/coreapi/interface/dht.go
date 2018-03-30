@@ -19,14 +19,6 @@ type DhtAPI interface {
 	// given a key.
 	FindProviders(context.Context, Path, ...options.DhtFindProvidersOption) (<-chan peer.ID, error) //TODO: is path the right choice here?
 
-	// WithNumProviders is an option for FindProviders which specifies the
-	// number of peers to look for. Default is 20
-	WithNumProviders(numProviders int) options.DhtFindProvidersOption
-
 	// Provide announces to the network that you are providing given values
 	Provide(context.Context, Path, ...options.DhtProvideOption) error
-
-	// WithRecursive is an option for Provide which specifies whether to provide
-	// the given path recursively
-	WithRecursive(recursive bool) options.DhtProvideOption
 }

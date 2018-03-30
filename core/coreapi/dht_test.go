@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	coreapi "github.com/ipfs/go-ipfs/core/coreapi"
+	options "github.com/ipfs/go-ipfs/core/coreapi/interface/options"
 
 	peer "gx/ipfs/QmZoWKhxUmZ2seW4BzX6fJkNR8hh9PsGModr7q171yq2SS/go-libp2p-peer"
 	blocks "gx/ipfs/Qmej7nf81hi2x2tvjRBF3mcp74sQyuDH4VMYDGd1YtXjb2/go-block-format"
@@ -54,7 +55,7 @@ func TestDhtFindProviders(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	out, err := apis[2].Dht().FindProviders(ctx, p, apis[2].Dht().WithNumProviders(1))
+	out, err := apis[2].Dht().FindProviders(ctx, p, options.Dht.NumProviders(1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +84,7 @@ func TestDhtProvide(t *testing.T) {
 	nds[0].Blockstore.Put(b)
 	p := coreapi.ParseCid(b.Cid())
 
-	out, err := apis[2].Dht().FindProviders(ctx, p, apis[2].Dht().WithNumProviders(1))
+	out, err := apis[2].Dht().FindProviders(ctx, p, options.Dht.NumProviders(1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +100,7 @@ func TestDhtProvide(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	out, err = apis[2].Dht().FindProviders(ctx, p, apis[2].Dht().WithNumProviders(1))
+	out, err = apis[2].Dht().FindProviders(ctx, p, options.Dht.NumProviders(1))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -21,10 +21,7 @@ import (
 
 var ErrNotDHT = errors.New("routing service is not a DHT")
 
-type DhtAPI struct {
-	*CoreAPI
-	*caopts.DhtOptions
-}
+type DhtAPI CoreAPI
 
 func (api *DhtAPI) FindPeer(ctx context.Context, p peer.ID) (<-chan ma.Multiaddr, error) {
 	dht, ok := api.node.Routing.(*ipdht.IpfsDHT)
@@ -93,7 +90,7 @@ func (api *DhtAPI) FindProviders(ctx context.Context, p coreiface.Path, opts ...
 		return nil, ErrNotDHT
 	}
 
-	p, err = api.ResolvePath(ctx, p)
+	p, err = api.core().ResolvePath(ctx, p)
 	if err != nil {
 		return nil, err
 	}
@@ -237,4 +234,8 @@ func provideKeysRec(ctx context.Context, r routing.IpfsRouting, dserv ipld.DAGSe
 	}
 
 	return nil
+}
+
+func (api *DhtAPI) core() coreiface.CoreAPI {
+	return (*CoreAPI)(api)
 }
