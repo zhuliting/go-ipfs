@@ -15,7 +15,7 @@ import (
 
 func TestDhtFindPeer(t *testing.T) {
 	ctx := context.Background()
-	nds, apis, err := makeAPISwarm(ctx, true, 3)
+	nds, apis, err := makeAPISwarm(ctx, true, 5)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,8 +27,8 @@ func TestDhtFindPeer(t *testing.T) {
 
 	addr := <-out
 
-	if addr.String() != "/ip4/127.0.0.1/tcp/4001" {
-		t.Errorf("got unexpected address from FindPeer: %s", addr.String())
+	if addr == nil || addr.String() != "/ip4/127.0.0.1/tcp/4001" {
+		t.Errorf("got unexpected address from FindPeer: %s", addr)
 	}
 
 	out, err = apis[1].Dht().FindPeer(ctx, peer.ID(nds[2].Identity))
@@ -38,14 +38,14 @@ func TestDhtFindPeer(t *testing.T) {
 
 	addr = <-out
 
-	if addr.String() != "/ip4/127.0.2.1/tcp/4001" {
-		t.Errorf("got unexpected address from FindPeer: %s", addr.String())
+	if addr == nil || addr.String() != "/ip4/127.0.2.1/tcp/4001" {
+		t.Errorf("got unexpected address from FindPeer: %s", addr)
 	}
 }
 
 func TestDhtFindProviders(t *testing.T) {
 	ctx := context.Background()
-	nds, apis, err := makeAPISwarm(ctx, true, 3)
+	nds, apis, err := makeAPISwarm(ctx, true, 5)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func TestDhtFindProviders(t *testing.T) {
 
 func TestDhtProvide(t *testing.T) {
 	ctx := context.Background()
-	nds, apis, err := makeAPISwarm(ctx, true, 3)
+	nds, apis, err := makeAPISwarm(ctx, true, 5)
 	if err != nil {
 		t.Fatal(err)
 	}
