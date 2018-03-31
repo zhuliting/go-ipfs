@@ -9,6 +9,7 @@ import (
 	coreapi "github.com/ipfs/go-ipfs/core/coreapi"
 	options "github.com/ipfs/go-ipfs/core/coreapi/interface/options"
 
+	ma "gx/ipfs/QmWWQ2Txc2c6tqjsBpzg5Ar652cHPGNsQQp2SejkNmkUMb/go-multiaddr"
 	peer "gx/ipfs/QmZoWKhxUmZ2seW4BzX6fJkNR8hh9PsGModr7q171yq2SS/go-libp2p-peer"
 	blocks "gx/ipfs/Qmej7nf81hi2x2tvjRBF3mcp74sQyuDH4VMYDGd1YtXjb2/go-block-format"
 )
@@ -25,7 +26,10 @@ func TestDhtFindPeer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	addr := <-out
+	var addr ma.Multiaddr
+	if len(out.Addrs) > 0 {
+		addr = out.Addrs[0]
+	}
 
 	if addr == nil || addr.String() != "/ip4/127.0.0.1/tcp/4001" {
 		t.Errorf("got unexpected address from FindPeer: %s", addr)
@@ -36,7 +40,10 @@ func TestDhtFindPeer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	addr = <-out
+	addr = nil
+	if len(out.Addrs) > 0 {
+		addr = out.Addrs[0]
+	}
 
 	if addr == nil || addr.String() != "/ip4/127.0.2.1/tcp/4001" {
 		t.Errorf("got unexpected address from FindPeer: %s", addr)
@@ -62,8 +69,8 @@ func TestDhtFindProviders(t *testing.T) {
 
 	provider := <-out
 
-	if provider.String() != nds[0].Identity.String() {
-		t.Errorf("got wrong provider: %s != %s", provider.String(), nds[0].Identity.String())
+	if provider.ID.String() != nds[0].Identity.String() {
+		t.Errorf("got wrong provider: %s != %s", provider.ID.String(), nds[0].Identity.String())
 	}
 }
 
@@ -91,8 +98,8 @@ func TestDhtProvide(t *testing.T) {
 
 	provider := <-out
 
-	if provider.String() != "<peer.ID >" {
-		t.Errorf("got wrong provider: %s != %s", provider.String(), nds[0].Identity.String())
+	if provider.ID.String() != "<peer.ID >" {
+		t.Errorf("got wrong provider: %s != %s", provider.ID.String(), nds[0].Identity.String())
 	}
 
 	err = apis[0].Dht().Provide(ctx, p)
@@ -107,7 +114,7 @@ func TestDhtProvide(t *testing.T) {
 
 	provider = <-out
 
-	if provider.String() != nds[0].Identity.String() {
-		t.Errorf("got wrong provider: %s != %s", provider.String(), nds[0].Identity.String())
+	if provider.ID.String() != nds[0].Identity.String() {
+		t.Errorf("got wrong provider: %s != %s", provider.ID.String(), nds[0].Identity.String())
 	}
 }

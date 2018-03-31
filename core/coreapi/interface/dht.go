@@ -5,7 +5,7 @@ import (
 
 	options "github.com/ipfs/go-ipfs/core/coreapi/interface/options"
 
-	ma "gx/ipfs/QmWWQ2Txc2c6tqjsBpzg5Ar652cHPGNsQQp2SejkNmkUMb/go-multiaddr"
+	pstore "gx/ipfs/QmXauCuJzmzapetmC6W4TuDJLL1yFFrVzSHoWv8YdbmnxH/go-libp2p-peerstore"
 	peer "gx/ipfs/QmZoWKhxUmZ2seW4BzX6fJkNR8hh9PsGModr7q171yq2SS/go-libp2p-peer"
 )
 
@@ -13,11 +13,11 @@ import (
 type DhtAPI interface {
 	// FindPeer queries the DHT for all of the multiaddresses associated with a
 	// Peer ID
-	FindPeer(context.Context, peer.ID) (<-chan ma.Multiaddr, error)
+	FindPeer(context.Context, peer.ID) (pstore.PeerInfo, error)
 
 	// FindProviders finds peers in the DHT who can provide a specific value
 	// given a key.
-	FindProviders(context.Context, Path, ...options.DhtFindProvidersOption) (<-chan peer.ID, error) //TODO: is path the right choice here?
+	FindProviders(context.Context, Path, ...options.DhtFindProvidersOption) (<-chan pstore.PeerInfo, error)
 
 	// Provide announces to the network that you are providing given values
 	Provide(context.Context, Path, ...options.DhtProvideOption) error
