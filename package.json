@@ -581,6 +581,12 @@
       "hash": "QmPdqSMmiwtQCBC515gFtMW2mP14HsfgnyQ2k5xPQVxMge",
       "name": "go-fs-lock",
       "version": "0.1.2"
+    },
+    {
+      "author": "hsanjuan",
+      "hash": "QmdcAXgEHUueP4A7b5hjabKn2EooeHgMreMvFC249dGCgc",
+      "name": "go-ipfs-exchange-interface",
+      "version": "0.0.1"
     }
   ],
   "gxVersion": "0.10.0",
