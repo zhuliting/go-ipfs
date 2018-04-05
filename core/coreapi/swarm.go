@@ -121,7 +121,7 @@ func (api *SwarmAPI) Peers(context.Context) ([]coreiface.PeerInfo, error) {
 }
 
 func (ci *connInfo) ID() peer.ID {
-	return ci.ID()
+	return ci.peer
 }
 
 func (ci *connInfo) Address() ma.Multiaddr {
