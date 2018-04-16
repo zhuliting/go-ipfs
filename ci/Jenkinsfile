@@ -64,7 +64,7 @@ def gobuild_step(list) {
 
 /* PIPELINE */
 
-ansiColor('xterm') { withEnv(['TERM=xterm-color']) { timeout(time: 30, unit: 'MINUTES') {
+ansiColor('xterm') { withEnv(['TERM=xterm-color']) { timeout(time: 3000, unit: 'MINUTES') {
   stage('Checks') {
     parallel(
       'go fmt': {
@@ -83,11 +83,12 @@ ansiColor('xterm') { withEnv(['TERM=xterm-color']) { timeout(time: 30, unit: 'MI
     )
   }
 
-  stage('Tests') {
+  for (i = 1; i < 48; i+=2) {
+  stage("Tests -j$i") {
     parallel(
-      'go build (other platforms)': {
+      /*'go build (other platforms)': {
         gobuild_step(build_platforms)
-      },
+      },*/
       windows: {
         setupStep('windows') { run ->
           run 'go get -v github.com/jstemmer/go-junit-report github.com/whyrusleeping/gx github.com/whyrusleeping/gx-go'
@@ -125,7 +126,7 @@ ansiColor('xterm') { withEnv(['TERM=xterm-color']) { timeout(time: 30, unit: 'MI
           run "make gx-deps"
 
           try {
-            run "make -j12 -Otarget test/sharness/test-results/sharness.xml CONTINUE_ON_S_FAILURE=1 TEST_NO_FUSE=1 TEST_NO_DOCKER=1"
+            run "make -j$i -Otarget test/sharness/test-results/sharness.xml CONTINUE_ON_S_FAILURE=1 TEST_NO_FUSE=1 TEST_NO_DOCKER=1"
           } catch (err) {
             throw err
           } finally {
@@ -155,7 +156,7 @@ ansiColor('xterm') { withEnv(['TERM=xterm-color']) { timeout(time: 30, unit: 'MI
           run "make gx-deps"
 
           try {
-            run "make -j12 test/sharness/test-results/sharness.xml CONTINUE_ON_S_FAILURE=1 TEST_NO_FUSE=1"
+            run "make -j$i test/sharness/test-results/sharness.xml CONTINUE_ON_S_FAILURE=1 TEST_NO_FUSE=1"
           } catch (err) {
             throw err
           } finally {
@@ -165,5 +166,6 @@ ansiColor('xterm') { withEnv(['TERM=xterm-color']) { timeout(time: 30, unit: 'MI
         }
       },
     )
+  }
   }
 }}}
