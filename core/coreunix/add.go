@@ -132,6 +132,28 @@ func (adder *Adder) SetMfsRoot(r *mfs.Root) {
 }
 
 // Constructs a node from reader's data, and adds it. Doesn't pin.
+func (adder *Adder) Myadd(reader io.Reader) (ipld.Node, error) {
+	chnk, err := chunker.FromString(reader, adder.Chunker)
+	if err != nil {
+		return nil, err
+	}
+
+	params := ihelper.DagBuilderParams{
+		Dagserv:   adder.dagService,
+		RawLeaves: adder.RawLeaves,
+		Maxlinks:  ihelper.DefaultLinksPerBlock,
+		NoCopy:    adder.NoCopy,
+		Prefix:    adder.Prefix,
+	}
+
+	if adder.Trickle {
+		return trickle.Layout(params.New(chnk))
+	}
+
+	return balanced.Layout(params.New(chnk))
+}
+
+// Constructs a node from reader's data, and adds it. Doesn't pin.
 func (adder *Adder) add(reader io.Reader) (ipld.Node, error) {
 	chnk, err := chunker.FromString(reader, adder.Chunker)
 	if err != nil {
