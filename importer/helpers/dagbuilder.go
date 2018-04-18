@@ -205,11 +205,6 @@ func (db *DagBuilderHelper) Add(node *UnixfsNode) (ipld.Node, error) {
 		return nil, err
 	}
 
-	err = db.dserv.Add(context.TODO(), dn)
-	if err != nil {
-		return nil, err
-	}
-
 	return dn, nil
 }
 
